@@ -1,11 +1,11 @@
-
-
 datasource db {
   provider = "postgresql"
 }
+
 generator client {
   provider = "prisma-client-js"
 }
+
 enum TaskStatus {
   PENDENTE
   CONCLUIDO
@@ -15,14 +15,15 @@ model User {
   id    Int    @id @default(autoincrement())
   name  String
   email String @unique
-  task  Task[]
+  tasks Task[]
 }
 
 model Task {
   id     Int        @id @default(autoincrement())
-  title  String 
+  title  String
   status TaskStatus @default(PENDENTE)
-  userId Int 
-  user   User       @relation(fields: [userId], references: [id])
-  @@unique([title,userId])
+  userId Int
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([title, userId])
 }

@@ -5,10 +5,11 @@ import type {
   responseTaskInput,
   updateTaskInput,
 } from "../schemas/task.schemas.js";
-import type { UpdateTaskData } from "../../../core/types/updateTaskData.js";
+import { Prisma } from "@prisma/client";
+
 class TaskRepository {
   async findAll(): Promise<responseTaskInput[]> {
-    return await prisma.task.findMany({
+    return prisma.task.findMany({
       select: {
         id: true,
         title: true,
@@ -19,7 +20,7 @@ class TaskRepository {
   }
 
   async findById(id: idTaskInput): Promise<responseTaskInput | null> {
-    return await prisma.task.findUnique({
+    return prisma.task.findUnique({
       where: { id },
       select: {
         id: true,
@@ -31,16 +32,13 @@ class TaskRepository {
   }
 
   async create(task: createTaskInput): Promise<responseTaskInput> {
-    if (!task.userId) {
-      throw new Error("userId is required to create a task");
-    }
     const data = {
-      title: task.title,
-      status: task.status ?? TaskStatus.PENDENTE,
+      title: task.title, // obrigatório
+      status: task.status ?? TaskStatus.PENDENTE, // valor padrão
       userId: task.userId,
-    };
+    } as Prisma.TaskCreateInput | any;
 
-    return await prisma.task.create({
+    return prisma.task.create({
       data,
       select: {
         id: true,
@@ -51,13 +49,14 @@ class TaskRepository {
     });
   }
 
-  async update(id: idTaskInput, task: updateTaskInput): Promise<responseTaskInput> {
 
-    const data: UpdateTaskData = {}
+  async update(id: idTaskInput, task: updateTaskInput): Promise<responseTaskInput> {
+    const data: Prisma.TaskUpdateInput = {};
+
     if (task.title !== undefined) data.title = task.title;
     if (task.status !== undefined) data.status = task.status;
 
-    return await prisma.task.update({
+    return prisma.task.update({
       where: { id },
       data,
       select: {

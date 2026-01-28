@@ -1,4 +1,5 @@
 import TaskRepository from "../repository/task.repository.js";
+import UserRepository from "../../users/repository/user.repository.js";
 import AppError from "../../../core/error/appError.js";
 import { responseTaskSchema } from "../schemas/task.schemas.js";
 import type {
@@ -9,6 +10,8 @@ import type {
 } from "../schemas/task.schemas.js";
 
 class TaskService {
+  private readonly userRepository = new UserRepository();
+
   constructor(private readonly repository: TaskRepository) {}
 
   async findAll(): Promise<responseTaskInput[]> {
@@ -25,7 +28,11 @@ class TaskService {
   }
 
   async create(data: createTaskInput): Promise<responseTaskInput> {
-    // data já validada no controller
+    const user = await this.userRepository.findById(data.userId);
+    if (!user) {
+      throw new AppError("Usuário não encontrado", 404);
+    }
+
     const task = await this.repository.create(data);
     return responseTaskSchema.parse(task);
   }
@@ -34,9 +41,6 @@ class TaskService {
     id: idTaskInput,
     data: updateTaskInput,
   ): Promise<responseTaskInput> {
-    // data já validada no controller
-
-    // Garante que há pelo menos um campo para atualizar
     if (Object.keys(data).length === 0) {
       throw new AppError("Nenhum dado para atualizar", 400);
     }
@@ -55,11 +59,7 @@ class TaskService {
   }
 
   async deleteById(id: idTaskInput): Promise<void> {
-    const existing = await this.repository.findById(id);
-    if (!existing) {
-      throw new AppError("Tarefa não encontrada", 404);
-    }
-
+    await this.findById(id);
     await this.repository.delete(id);
   }
 }

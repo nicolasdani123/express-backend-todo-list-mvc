@@ -1,15 +1,15 @@
 import { z } from "zod";
 
-const idUserSchema = z.int().min(1).positive();
+ export const idUserSchema = z.int().min(1).positive();
 const nameUserSchema = z.string().min(1);
 const emailUserSchema = z.string().email().min(1);
 
-const createUserSchema = z.object({
+ export const createUserSchema = z.object({
   name: nameUserSchema,
   email: emailUserSchema,
 });
 
-const updateUserSchema = createUserSchema.partial();
+ export const updateUserSchema = createUserSchema.partial();
 
 export const responseUserSchema = z.object({
   id: idUserSchema,

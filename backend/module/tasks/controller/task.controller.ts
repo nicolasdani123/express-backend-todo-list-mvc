@@ -1,4 +1,3 @@
-import AppError from "../../../core/error/appError.js";
 import {
   idTaskSchema,
   createTaskSchema,
@@ -17,36 +16,34 @@ class TaskController {
 
   async findById(req: Request, res: Response): Promise<void> {
     const id = idTaskSchema.parse(Number(req.params.id));
+
     const task = await this.service.findById(id);
+
     res.json(task);
   }
 
   async create(req: Request, res: Response): Promise<void> {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      throw new AppError("Dados são obrigatórios", 400);
-    }
-
     const payload = createTaskSchema.parse(req.body);
+
     const task = await this.service.create(payload);
 
     res.status(201).json(task);
   }
-  
+
   async update(req: Request, res: Response): Promise<void> {
     const id = idTaskSchema.parse(Number(req.params.id));
-
-    if (!req.body || Object.keys(req.body).length === 0) {
-      throw new AppError("Dados são obrigatórios", 400);
-    }
-
     const payload = updateTaskSchema.parse(req.body);
+
     const task = await this.service.update(id, payload);
+
     res.json(task);
   }
 
   async delete(req: Request, res: Response): Promise<void> {
     const id = idTaskSchema.parse(Number(req.params.id));
+
     await this.service.delete(id);
+
     res.status(204).send();
   }
 }
